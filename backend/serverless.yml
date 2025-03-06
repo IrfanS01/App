@@ -1,0 +1,183 @@
+# Serverless Framework Konfiguracija za MinApp Backend
+
+org: irresarac
+service: MinAppBackend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-north-1
+
+  # IAM Role Permissions
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        # Dozvole za rad sa Cognito User Pool-om
+        - cognito-idp:AdminCreateUser
+        - cognito-idp:AdminDeleteUser
+        - cognito-idp:AdminGetUser
+        - cognito-idp:AdminUpdateUserAttributes
+        - cognito-idp:AdminInitiateAuth
+        - cognito-idp:ListUsers
+      Resource:
+        - !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPool}
+
+    - Effect: Allow
+      Action:
+        # DynamoDB Dozvole - ograničene na specifične tabele
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Users
+        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Notifications
+
+    - Effect: Allow
+      Action:
+        # Lambda funkcije (ako koristiš pozivanje između funkcija)
+        - lambda:InvokeFunction
+      Resource: "*"
+
+    - Effect: Allow
+      Action:
+        # S3 Dozvole za rad sa fajlovima (ako planiraš koristiti S3)
+        - s3:ListBucket
+        - s3:GetObject
+        - s3:PutObject
+      Resource: "*"
+
+  # Globalne environment varijable za backend
+  environment:
+    COGNITO_USER_POOL_ID: !Ref CognitoUserPool
+    COGNITO_CLIENT_ID: !Ref CognitoUserPoolClient
+    USERS_TABLE: Users
+    NOTIFICATIONS_TABLE: Notifications
+
+functions:
+  # Funkcija za registraciju korisnika (Cognito)
+  register:
+    handler: src/handlers/auth.register
+    events:
+      - http:
+          path: auth/register
+          method: post
+          cors: true
+
+  # Funkcija za prijavu korisnika (Cognito)
+  login:
+    handler: src/handlers/auth.login
+    events:
+      - http:
+          path: auth/login
+          method: post
+          cors: true
+
+  # Funkcija za dohvat svih korisnika iz DynamoDB
+  getUsers:
+    handler: src/handlers/users.getUsers
+    events:
+      - http:
+          path: users
+          method: get
+          cors: true
+
+  # Funkcija za dodavanje obavijesti (Styrelse)
+  createNotification:
+    handler: src/handlers/notifications.createNotification
+    events:
+      - http:
+          path: notifications
+          method: post
+          cors: true
+
+  # Funkcija za dohvat obavijesti
+  getNotifications:
+    handler: src/handlers/notifications.getNotifications
+    events:
+      - http:
+          path: notifications
+          method: get
+          cors: true
+
+  # Funkcija za kreiranje rezervacije (overnattningslägenhet/terasa)
+  createReservation:
+    handler: src/handlers/reservations.createReservation
+    events:
+      - http:
+          path: reservations
+          method: post
+          cors: true
+
+  # Funkcija za dohvat svih rezervacija
+  getReservations:
+    handler: src/handlers/reservations.getReservations
+    events:
+      - http:
+          path: reservations
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    # AWS Cognito User Pool
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: MinAppUserPool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+
+    # AWS Cognito User Pool Client
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: MinAppClient
+        UserPoolId:
+          Ref: CognitoUserPool
+        GenerateSecret: false
+
+    # DynamoDB tabela za korisnike
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Users
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+
+    # DynamoDB tabela za obavijesti
+    NotificationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Notifications
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+    # DynamoDB tabela za rezervacije
+    ReservationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Reservations
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+plugins:
+  - serverless-offline

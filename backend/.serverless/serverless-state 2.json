@@ -1,0 +1,191 @@
+{
+  "service": {
+    "service": "my-service",
+    "serviceObject": {
+      "name": "my-service"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "stage": "dev",
+      "region": "us-east-1",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "HelloLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/my-service-dev-hello"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "my-service",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/my-service-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/my-service-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "my-service",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "HelloLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-519add11-70be",
+                "S3Key": "serverless/my-service/dev/1741220736243-2025-03-06T00:25:36.243Z/my-service.zip"
+              },
+              "Handler": "handler.hello",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "my-service-dev-hello",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "HelloLogGroup"
+            ]
+          },
+          "HelloLambdaVersionU9ACppJtfn4qt9CBQQdFIGO5RRF7TZvsEmfwsIBfg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "HelloLambdaFunction"
+              },
+              "CodeSha256": "HHxs0DDPBXmdzVMO8UGlhe59ZHNnaZt1YLeOj3so6wQ="
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-519add11-70be",
+            "Export": {
+              "Name": "sls-my-service-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "HelloLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "HelloLambdaVersionU9ACppJtfn4qt9CBQQdFIGO5RRF7TZvsEmfwsIBfg"
+            },
+            "Export": {
+              "Name": "sls-my-service-dev-HelloLambdaFunctionQualifiedArn"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "pluginsData": {},
+    "functions": {
+      "hello": {
+        "handler": "handler.hello",
+        "events": [],
+        "name": "my-service-dev-hello",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "HelloLambdaVersionU9ACppJtfn4qt9CBQQdFIGO5RRF7TZvsEmfwsIBfg"
+      }
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless",
+    "initialServerlessConfig": {
+      "org": "irresarac",
+      "service": "my-service",
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      }
+    },
+    "appId": null,
+    "org": "irresarac",
+    "orgId": null,
+    "layers": {},
+    "artifact": "/Users/irfansarac/Desktop/App01/App/backend/.serverless/my-service.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/my-service/dev/1741220736243-2025-03-06T00:25:36.243Z",
+    "artifact": "my-service.zip"
+  }
+}
