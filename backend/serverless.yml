@@ -50,8 +50,8 @@ provider:
 
   # Globalne environment varijable za backend
   environment:
-    COGNITO_USER_POOL_ID: !Ref CognitoUserPool
-    COGNITO_CLIENT_ID: !Ref CognitoUserPoolClient
+    COGNITO_USER_POOL_ID: !GetAtt CognitoUserPool.Arn
+    COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID}
     USERS_TABLE: Users
     NOTIFICATIONS_TABLE: Notifications
 
