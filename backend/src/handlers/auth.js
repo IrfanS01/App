@@ -2,6 +2,9 @@ const cognito = require("../config/cognito");
 const response = require("../utils/response");
 
 // ✅ Registracija korisnika u Cognito User Pool
+console.log("COGNITO_CLIENT_ID TYPE:", typeof process.env.COGNITO_CLIENT_ID);
+console.log("COGNITO_CLIENT_ID VALUE:", process.env.COGNITO_CLIENT_ID);
+
 module.exports.register = async (event) => {
     const body = JSON.parse(event.body);
 
