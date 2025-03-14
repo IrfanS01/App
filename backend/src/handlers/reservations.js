@@ -3,6 +3,11 @@ const { v4: uuidv4 } = require("uuid");
 const response = require("../utils/response");
 
 // ✅ Kreiranje rezervacije
+
+if (!process.env.RESERVATIONS_TABLE) {
+    throw new Error("RESERVATIONS_TABLE is not defined! Check your serverless.yml and deployment.");
+}
+
 module.exports.createReservation = async (event) => {
     const body = JSON.parse(event.body);
 
@@ -16,6 +21,8 @@ module.exports.createReservation = async (event) => {
         },
     };
 
+    console.log("DynamoDB Params:", JSON.stringify(params, null, 2)); // ✅ Premješteno unutar funkcije
+
     try {
         await dynamoDB.put(params).promise();
         return response.success({ message: "Reservation created!" });
@@ -23,6 +30,7 @@ module.exports.createReservation = async (event) => {
         return response.error(error.message);
     }
 };
+
 
 // ✅ Dohvatanje svih rezervacija
 module.exports.getReservations = async () => {
