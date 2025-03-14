@@ -54,6 +54,7 @@ provider:
     COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID}
     USERS_TABLE: Users
     NOTIFICATIONS_TABLE: Notifications
+    RESERVATIONS_TABLE: ${env:RESERVATIONS_TABLE}
 
 functions:
   # Funkcija za registraciju korisnika (Cognito)
