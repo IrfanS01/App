@@ -15,7 +15,7 @@ const Login = () => {
 
     // Validacija polja
     if (!email || !password) {
-      setErrorMsg("Molimo unesite email i lozinku.");
+      setErrorMsg("Please enter email and password.");
       return;
     }
 
@@ -34,22 +34,22 @@ const Login = () => {
         // Preusmjeri korisnika na dashboard
         navigate("/dashboard");
       } else {
-        setErrorMsg(data.message || "Greška pri loginu.");
+        setErrorMsg(data.message || "Login error.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      setErrorMsg("Greška u mreži. Pokušajte ponovo.");
+      setErrorMsg("Network error. Please try again.");
     }
   };
 
   return (
     <div style={styles.container}>
-      <h2>Prijava</h2>
+      <h2>Login</h2>
       {errorMsg && <p style={styles.error}>{errorMsg}</p>}
       <form onSubmit={handleLogin} style={styles.form}>
         <input
           type="email"
-          placeholder="Email adresa"
+          placeholder="Email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={styles.input}
@@ -57,13 +57,13 @@ const Login = () => {
         />
         <input
           type="password"
-          placeholder="Lozinka"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
           required
         />
-        <button type="submit" style={styles.button}>Prijavi se</button>
+        <button type="submit" style={styles.button}>Sign in</button>
       </form>
     </div>
   );

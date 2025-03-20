@@ -13,18 +13,18 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Reset poruka
+    // Reset messages
     setMessage("");
     setErrorMsg("");
 
-    // Validacija polja
+    // Field validation
     if (!fullName || !apartmentNumber || !email || !password) {
-      setErrorMsg("Sva polja su obavezna.");
+      setErrorMsg("All fields are required.");
       return;
     }
 
     if (password.length < 6) {
-      setErrorMsg("Lozinka mora imati najmanje 6 karaktera.");
+      setErrorMsg("Password must be at least 6 characters long.");
       return;
     }
 
@@ -38,27 +38,27 @@ const Register = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Registracija uspješna. Provjerite email za verifikaciju.");
-        // Opcionalno: preusmjeri korisnika na login
+        setMessage("Registration successful. Please check your email to verify your account.");
+        // Optional: redirect to login
         setTimeout(() => navigate("/login"), 3000);
       } else {
-        setErrorMsg(data.message || "Greška pri registraciji.");
+        setErrorMsg(data.message || "Registration error.");
       }
     } catch (error) {
       console.error("Register error:", error);
-      setErrorMsg("Greška u mreži. Pokušajte ponovo.");
+      setErrorMsg("Network error. Please try again.");
     }
   };
 
   return (
     <div style={styles.container}>
-      <h2>Registracija</h2>
+      <h2>Register</h2>
       {message && <p style={styles.success}>{message}</p>}
       {errorMsg && <p style={styles.error}>{errorMsg}</p>}
       <form onSubmit={handleRegister} style={styles.form}>
         <input
           type="text"
-          placeholder="Ime i Prezime"
+          placeholder="Full Name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           style={styles.input}
@@ -66,7 +66,7 @@ const Register = () => {
         />
         <input
           type="text"
-          placeholder="Broj stana"
+          placeholder="Apartment Number"
           value={apartmentNumber}
           onChange={(e) => setApartmentNumber(e.target.value)}
           style={styles.input}
@@ -74,7 +74,7 @@ const Register = () => {
         />
         <input
           type="email"
-          placeholder="Email adresa"
+          placeholder="Email Address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={styles.input}
@@ -82,13 +82,13 @@ const Register = () => {
         />
         <input
           type="password"
-          placeholder="Lozinka"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
           required
         />
-        <button type="submit" style={styles.button}>Registruj se</button>
+        <button type="submit" style={styles.button}>Sign Up</button>
       </form>
     </div>
   );
