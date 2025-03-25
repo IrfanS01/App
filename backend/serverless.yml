@@ -1,42 +1,19 @@
-org: irresarac
 service: MinAppBackend
 
 provider:
   name: aws
   runtime: nodejs18.x
   region: eu-north-1
-
-  # IAM Role Permissions
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - cognito-idp:AdminCreateUser
-        - cognito-idp:AdminDeleteUser
-        - cognito-idp:AdminGetUser
-        - cognito-idp:AdminUpdateUserAttributes
-        - cognito-idp:AdminInitiateAuth
-        - cognito-idp:ListUsers
-      Resource:
-        - !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPool}
-
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Users
-        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Notifications
-        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Reservations  # OVO JE DODANO ✅
-
+  stage: dev
   environment:
     COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
     COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID}
-    USERS_TABLE: Users
-    NOTIFICATIONS_TABLE: Notifications
-    RESERVATIONS_TABLE: Reservations  # ISPRAVLJENO ✅
+    REGION: ${env:REGION}
+    RESERVATIONS_TABLE: ${env:RESERVATIONS_TABLE}
+    USERS_TABLE: ${env:USERS_TABLE}
+    NOTIFICATIONS_TABLE: ${env:NOTIFICATIONS_TABLE}
+    MESSAGES_TABLE: ${env:MESSAGES_TABLE}
+    CORS_ORIGIN: ${env:CORS_ORIGIN}
 
 functions:
   register:
@@ -45,7 +22,12 @@ functions:
       - http:
           path: auth/register
           method: post
-          cors: true
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
   login:
     handler: src/handlers/auth.login
@@ -53,7 +35,12 @@ functions:
       - http:
           path: auth/login
           method: post
-          cors: true
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
   getUsers:
     handler: src/handlers/users.getUsers
@@ -61,7 +48,12 @@ functions:
       - http:
           path: users
           method: get
-          cors: true
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
   createNotification:
     handler: src/handlers/notifications.createNotification
@@ -69,7 +61,12 @@ functions:
       - http:
           path: notifications
           method: post
-          cors: true
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
   getNotifications:
     handler: src/handlers/notifications.getNotifications
@@ -77,7 +74,12 @@ functions:
       - http:
           path: notifications
           method: get
-          cors: true
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
   createReservation:
     handler: src/handlers/reservations.createReservation
@@ -85,7 +87,12 @@ functions:
       - http:
           path: reservations
           method: post
-          cors: true
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
   getReservations:
     handler: src/handlers/reservations.getReservations
@@ -93,57 +100,38 @@ functions:
       - http:
           path: reservations
           method: get
-          cors: true
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
-resources:
-  Resources:
-    CognitoUserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UserPoolName: MinAppUserPool
-        UsernameAttributes:
-          - email
-        AutoVerifiedAttributes:
-          - email
+  sendMessage:
+    handler: src/handlers/messages.sendMessage
+    events:
+      - http:
+          path: messages/send
+          method: post
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
-    CognitoUserPoolClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        ClientName: MinAppClient
-        UserPoolId:
-          Ref: CognitoUserPool
-        GenerateSecret: false
-
-    UsersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Users
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: email
-            AttributeType: S
-        KeySchema:
-          - AttributeName: email
-            KeyType: HASH
-
-    ReservationsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Reservations
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-
-outputs:
-  CognitoUserPoolId:
-    Value: !Ref CognitoUserPool
-    Export:
-      Name: CognitoUserPoolId
+  getMessages:
+    handler: src/handlers/messages.getMessages
+    events:
+      - http:
+          path: messages
+          method: get
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
 
 plugins:
   - serverless-offline
-

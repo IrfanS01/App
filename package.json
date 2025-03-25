@@ -1,0 +1,11 @@
+{
+  "name": "app01",
+  "version": "1.0.0",
+  "scripts": {
+    "validate-env": "node scripts/validateEnv.js",
+    "generate-env-example": "./generate-env-example.sh"
+  },
+  "devDependencies": {
+    "dotenv": "^10.0.0"
+  }
+}

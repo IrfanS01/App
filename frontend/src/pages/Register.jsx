@@ -1,23 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import fetchHelper from "../api/fetchHelper";
 
 const Register = () => {
   const [fullName, setFullName] = useState("");
   const [apartmentNumber, setApartmentNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [roleCode, setRoleCode] = useState("");
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    // Reset messages
     setMessage("");
     setErrorMsg("");
 
-    // Field validation
     if (!fullName || !apartmentNumber || !email || !password) {
       setErrorMsg("All fields are required.");
       return;
@@ -28,25 +27,14 @@ const Register = () => {
       return;
     }
 
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    const payload = { email, password, fullName, apartmentNumber, roleCode };
+    const { success, error } = await fetchHelper("/auth/register", "POST", payload, false);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Registration successful. Please check your email to verify your account.");
-        // Optional: redirect to login
-        setTimeout(() => navigate("/login"), 3000);
-      } else {
-        setErrorMsg(data.message || "Registration error.");
-      }
-    } catch (error) {
-      console.error("Register error:", error);
-      setErrorMsg("Network error. Please try again.");
+    if (success) {
+      setMessage("Registration successful. Please check your email.");
+      setTimeout(() => navigate("/login"), 3000);
+    } else {
+      setErrorMsg(error);
     }
   };
 
@@ -57,6 +45,7 @@ const Register = () => {
       {errorMsg && <p style={styles.error}>{errorMsg}</p>}
       <form onSubmit={handleRegister} style={styles.form}>
         <input
+          name="fullName"
           type="text"
           placeholder="Full Name"
           value={fullName}
@@ -65,6 +54,7 @@ const Register = () => {
           required
         />
         <input
+          name="apartmentNumber"
           type="text"
           placeholder="Apartment Number"
           value={apartmentNumber}
@@ -73,6 +63,7 @@ const Register = () => {
           required
         />
         <input
+          name="email"
           type="email"
           placeholder="Email Address"
           value={email}
@@ -81,12 +72,21 @@ const Register = () => {
           required
         />
         <input
+          name="password"
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
           required
+        />
+        <input
+          name="roleCode"
+          type="text"
+          placeholder="Tajni kod (samo za admina)"
+          value={roleCode}
+          onChange={(e) => setRoleCode(e.target.value)}
+          style={styles.input}
         />
         <button type="submit" style={styles.button}>Sign Up</button>
       </form>
@@ -95,35 +95,12 @@ const Register = () => {
 };
 
 const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "auto",
-    padding: "1rem",
-    textAlign: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  input: {
-    padding: "0.5rem",
-    fontSize: "1rem",
-  },
-  button: {
-    padding: "0.5rem",
-    fontSize: "1rem",
-    backgroundColor: "#4CAF50",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-  },
-  success: {
-    color: "green",
-  },
+  container: { maxWidth: "400px", margin: "auto", padding: "1rem", textAlign: "center" },
+  form: { display: "flex", flexDirection: "column", gap: "1rem" },
+  input: { padding: "0.5rem", fontSize: "1rem" },
+  button: { padding: "0.5rem", fontSize: "1rem", backgroundColor: "#4CAF50", color: "white", border: "none", cursor: "pointer" },
+  error: { color: "red" },
+  success: { color: "green" },
 };
 
 export default Register;

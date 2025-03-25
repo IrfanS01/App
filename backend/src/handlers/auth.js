@@ -1,42 +1,107 @@
 const cognito = require("../config/cognito");
+const dynamoDB = require("../config/db");
 const response = require("../utils/response");
 
-// ✅ Registracija korisnika u Cognito User Pool
-module.exports.register = async (event) => {
-    const body = JSON.parse(event.body);
+const ADMIN_SECRET_CODE = "ADMIN2025";
 
-    const params = {
-        ClientId: process.env.COGNITO_CLIENT_ID,
-        Username: body.email,
-        Password: body.password,
-        UserAttributes: [{ Name: "email", Value: body.email }],
+// ✅ REGISTRACIJA – koristi cognito.signUp()
+const register = async (event) => {
+  const body = JSON.parse(event.body);
+  const { email, password, fullName, apartmentNumber, roleCode } = body;
+
+  if (!email || !password || !fullName || !apartmentNumber) {
+    return response.error("Sva polja su obavezna.");
+  }
+
+  let userRole = "user";
+  if (roleCode && roleCode === ADMIN_SECRET_CODE) {
+    userRole = "admin";
+  } else if (roleCode && roleCode !== ADMIN_SECRET_CODE) {
+    return response.error("Neispravan tajni kod za admina.");
+  }
+
+  const signUpParams = {
+    ClientId: process.env.COGNITO_CLIENT_ID,
+    Username: email,
+    Password: password,
+    UserAttributes: [
+      { Name: "email", Value: email },
+      { Name: "custom:role", Value: userRole }
+    ],
+  };
+
+  try {
+    await cognito.signUp(signUpParams).promise();
+
+    const userParams = {
+      TableName: process.env.USERS_TABLE,
+      Item: {
+        username: email, // 🟢 obavezno zbog DynamoDB
+        fullName,
+        apartmentNumber,
+        role: userRole,
+        createdAt: new Date().toISOString(),
+      },
     };
 
-    try {
-        await cognito.signUp(params).promise();
-        return response.success({ message: "User registered successfully!" });
-    } catch (error) {
-        return response.error(error.message);
-    }
+    await dynamoDB.put(userParams).promise();
+
+    return response.success({ message: "Registracija uspješna. Provjerite email za verifikaciju." });
+  } catch (error) {
+    console.error("Register error:", error);
+    return response.error("Greška: " + error.message);
+  }
 };
 
-// ✅ Prijava korisnika i dobijanje JWT tokena
-module.exports.login = async (event) => {
-    const body = JSON.parse(event.body);
+// ✅ LOGIN – koristi USER_PASSWORD_AUTH i vraća token + ulogu + ime + stan
+const login = async (event) => {
+  const body = JSON.parse(event.body);
+  const { email, password } = body;
 
-    const params = {
-        AuthFlow: "USER_PASSWORD_AUTH",
-        ClientId: process.env.COGNITO_CLIENT_ID,
-        AuthParameters: {
-            USERNAME: body.email,
-            PASSWORD: body.password,
-        },
-    };
+  if (!email || !password) {
+    return response.error("Email i lozinka su obavezni.");
+  }
 
-    try {
-        const result = await cognito.initiateAuth(params).promise();
-        return response.success({ token: result.AuthenticationResult.IdToken });
-    } catch (error) {
-        return response.error(error.message);
-    }
+  const params = {
+    AuthFlow: "USER_PASSWORD_AUTH",
+    ClientId: process.env.COGNITO_CLIENT_ID,
+    AuthParameters: {
+      USERNAME: email,
+      PASSWORD: password,
+    },
+  };
+
+  try {
+    const authResult = await cognito.initiateAuth(params).promise();
+    const token = authResult.AuthenticationResult.IdToken;
+
+    const userDetails = await cognito.getUser({
+      AccessToken: authResult.AuthenticationResult.AccessToken
+    }).promise();
+
+    const roleAttr = userDetails.UserAttributes.find(attr => attr.Name === "custom:role");
+    const userRole = roleAttr ? roleAttr.Value : "user";
+
+    // ✅ DOHVATI dodatne korisničke podatke iz DynamoDB
+    const userData = await dynamoDB.get({
+      TableName: process.env.USERS_TABLE,
+      Key: { username: body.email }
+
+    }).promise();
+
+    const fullName = userData.Item?.fullName || "";
+    const apartmentNumber = userData.Item?.apartmentNumber || "";
+
+    return response.success({ token, role: userRole, fullName, apartmentNumber });
+  } catch (error) {
+    console.error("Login error:", error);
+    return response.error("Prijava neuspješna: " + error.message);
+  }
+};
+
+
+// ✅ EXPORTI – zajednički
+module.exports = {
+  register,
+  login
 };

@@ -5,6 +5,9 @@ import Dashboard from "./pages/Dashboard";
 import Reservations from "./pages/Reservations";
 import Users from "./pages/Users";
 import ProtectedRoute from "./ProtectedRoute";
+import SendMessage from "./pages/SendMessage";
+import Inbox from "./pages/Inbox";
+
 
 function App() {
   return (
@@ -13,6 +16,9 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/send-message" element={<ProtectedRoute><SendMessage /></ProtectedRoute>} />
+        <Route path="/inbox" element={<ProtectedRoute><Inbox /></ProtectedRoute>} />
+        
 
         {/* Zaštićene rute */}
         <Route 
