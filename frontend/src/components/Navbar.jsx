@@ -14,6 +14,7 @@ const Navbar = () => {
         <li><Link to="/dashboard" style={styles.link}>Dashboard</Link></li>
         <li><Link to="/reservations" style={styles.link}>Reservations</Link></li>
         <li><Link to="/users" style={styles.link}>Users</Link></li>
+        <li><Link to="/inbox">Poruke</Link></li>
         <li><button onClick={handleLogout} style={styles.logoutButton}>Logout</button></li>
       </ul>
     </nav>

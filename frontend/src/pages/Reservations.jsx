@@ -39,6 +39,14 @@ const Reservations = () => {
     setErrorMsg("");
 
     const token = localStorage.getItem("token");
+    const userEmail = localStorage.getItem("userEmail");
+    const fullName = localStorage.getItem("fullName");
+    const apartmentNumber = localStorage.getItem("apartmentNumber");
+
+    if (!userEmail || !fullName || !apartmentNumber) {
+      setErrorMsg("Nedostaje info. Prijavite se ponovo.");
+      return;
+    }
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/reservations`, {
@@ -47,13 +55,19 @@ const Reservations = () => {
           "Content-Type": "application/json",
           "Authorization": token ? `Bearer ${token}` : "",
         },
-        body: JSON.stringify({ type, date, user: "currentUser@example.com" }), // Replace with real user data later
+        body: JSON.stringify({
+          user: userEmail,
+          userName: fullName,
+          apartmentNumber,
+          type,
+          date,
+        }),
       });
 
       const data = await response.json();
       if (response.ok) {
         setMessage("Reservation successful!");
-        fetchReservations(); // Refresh list
+        fetchReservations();
       } else {
         setErrorMsg(data.message || "Error making reservation.");
       }
@@ -73,6 +87,7 @@ const Reservations = () => {
 
         <form onSubmit={handleReservation} style={styles.form}>
           <select
+            name="type"
             value={type}
             onChange={(e) => setType(e.target.value)}
             required
@@ -84,6 +99,7 @@ const Reservations = () => {
           </select>
           <input
             type="date"
+            name="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
@@ -95,7 +111,8 @@ const Reservations = () => {
         <ul>
           {reservations.map((res) => (
             <li key={res.id}>
-              <strong>{res.type}</strong> — {res.date}
+              <strong>{res.userName || "Unknown"} (Stan {res.apartmentNumber || "?"})</strong> — {res.date} —
+              <a href={`mailto:${res.user}`}>Kontakt</a>
             </li>
           ))}
         </ul>
@@ -105,35 +122,12 @@ const Reservations = () => {
 };
 
 const styles = {
-  container: {
-    maxWidth: "600px",
-    margin: "auto",
-    padding: "1rem",
-  },
-  form: {
-    marginBottom: "1rem",
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-  },
-  input: {
-    padding: "0.5rem",
-    fontSize: "1rem",
-  },
-  button: {
-    padding: "0.5rem",
-    fontSize: "1rem",
-    backgroundColor: "#2196F3",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-  },
-  success: {
-    color: "green",
-  },
+  container: { maxWidth: "600px", margin: "auto", padding: "1rem" },
+  form: { marginBottom: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" },
+  input: { padding: "0.5rem", fontSize: "1rem" },
+  button: { padding: "0.5rem", fontSize: "1rem", backgroundColor: "#2196F3", color: "white", border: "none", cursor: "pointer" },
+  error: { color: "red" },
+  success: { color: "green" },
 };
 
 export default Reservations;
