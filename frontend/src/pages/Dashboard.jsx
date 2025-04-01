@@ -1,30 +1,22 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import { getNotifications } from "../api/notifications";
+import useFetchStatus from "../hooks/useFetchStatus";
 
 const Dashboard = () => {
   const [notifications, setNotifications] = useState([]);
-  const [errorMsg, setErrorMsg] = useState("");
+  const { loading, error, success, start, finish } = useFetchStatus();
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/notifications`, {
-          headers: {
-            "Authorization": token ? `Bearer ${token}` : "",
-          },
-        });
+      start();
+      const { success: ok, data, error: err } = await getNotifications();
 
-        const data = await response.json();
-
-        if (response.ok) {
-          setNotifications(data.data);
-        } else {
-          setErrorMsg(data.message || "Error fetching notifications.");
-        }
-      } catch (error) {
-        console.error("Fetch error:", error);
-        setErrorMsg("Network error.");
+      if (ok) {
+        setNotifications(data.data);
+        finish();
+      } else {
+        finish({ errorMessage: err || "Greška" });
       }
     };
 
@@ -36,8 +28,11 @@ const Dashboard = () => {
       <Navbar />
       <div style={styles.container}>
         <h2>Notifications</h2>
-        {errorMsg && <p style={styles.error}>{errorMsg}</p>}
-        {notifications.length === 0 && <p>No notifications.</p>}
+
+        {loading && <p>⏳ Učitavanje...</p>}
+        {error && <p style={styles.error}>{error}</p>}
+        {notifications.length === 0 && !loading && <p>No notifications.</p>}
+
         <ul>
           {notifications.map((note) => (
             <li key={note.id}>

@@ -36,13 +36,14 @@ const register = async (event) => {
     const userParams = {
       TableName: process.env.USERS_TABLE,
       Item: {
-        username: email, // 🟢 obavezno zbog DynamoDB
+        userId: email,          // ✅ ispravno ime prema tvojoj tabeli
         fullName,
         apartmentNumber,
         role: userRole,
         createdAt: new Date().toISOString(),
       },
     };
+    
 
     await dynamoDB.put(userParams).promise();
 
@@ -83,11 +84,13 @@ const login = async (event) => {
     const userRole = roleAttr ? roleAttr.Value : "user";
 
     // ✅ DOHVATI dodatne korisničke podatke iz DynamoDB
-    const userData = await dynamoDB.get({
-      TableName: process.env.USERS_TABLE,
-      Key: { username: body.email }
+    const keyName = process.env.USERS_TABLE_PRIMARY_KEY;
+const userData = await dynamoDB.get({
+  TableName: process.env.USERS_TABLE,
+  Key: { [keyName]: body.email } // ✅ fleksibilno
+}).promise();
 
-    }).promise();
+    
 
     const fullName = userData.Item?.fullName || "";
     const apartmentNumber = userData.Item?.apartmentNumber || "";
