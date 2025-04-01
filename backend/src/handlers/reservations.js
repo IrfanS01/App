@@ -17,7 +17,7 @@ module.exports.createReservation = async (event) => {
     return response.error("Missing required fields: user, type, or date.");
   }
 
-  if (!process.env.RESERVATIONS_TABLE || !process.env.USERS_TABLE) {
+  if (!process.env.RESERVATIONS_TABLE || !process.env.USERS_TABLE || !process.env.USERS_TABLE_PRIMARY_KEY) {
     return response.error("Table environment variables are missing.");
   }
 
@@ -48,10 +48,11 @@ module.exports.createReservation = async (event) => {
   // ➕ Dohvati korisničke podatke iz USERS_TABLE
   let userDetails;
   try {
+    const keyName = process.env.USERS_TABLE_PRIMARY_KEY;
     const result = await dynamoDB.get({
-        TableName: process.env.USERS_TABLE,
-        Key: { username: body.user }, // ✅ tačan ključ!
-      }).promise();
+      TableName: process.env.USERS_TABLE,
+      Key: { [keyName]: body.user }, // ✅ dinamički ključ
+    }).promise();
 
     userDetails = result.Item || {};
   } catch (err) {

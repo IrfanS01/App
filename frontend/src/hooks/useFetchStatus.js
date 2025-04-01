@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function useFetchStatus() {
+const useFetchStatus = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -11,11 +11,26 @@ export default function useFetchStatus() {
     setSuccess("");
   };
 
-  const finish = ({ successMessage = "", errorMessage = "" }) => {
+  const finish = ({ successMessage = "", errorMessage = "" } = {}) => {
     setLoading(false);
-    if (errorMessage) setError(errorMessage);
     if (successMessage) setSuccess(successMessage);
+    if (errorMessage) setError(errorMessage);
   };
 
-  return { loading, error, success, start, finish };
-}
+  const reset = () => {
+    setLoading(false);
+    setError("");
+    setSuccess("");
+  };
+
+  return {
+    loading,
+    error,
+    success,
+    start,
+    finish,
+    reset,
+  };
+};
+
+export default useFetchStatus;

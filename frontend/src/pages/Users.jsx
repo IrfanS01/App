@@ -10,12 +10,14 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       start();
+
       const { success: ok, data, error: err } = await getUsers();
+
       if (ok) {
         setUsers(Array.isArray(data?.data) ? data.data : []);
-        finish({ successMessage: "Učitano korisnika: " + data.length });
+        finish({ successMessage: "Učitano korisnika: " + data.data.length });
       } else {
-        finish({ errorMessage: err || "Greška" });
+        finish({ errorMessage: err || "Greška prilikom učitavanja korisnika." });
       }
     };
 
@@ -31,10 +33,13 @@ const Users = () => {
         {error && <p style={styles.error}>{error}</p>}
         {success && <p style={styles.success}>{success}</p>}
         {users.length === 0 && !loading && <p>No registered users.</p>}
+
         <ul>
           {users.map((user, index) => (
             <li key={index}>
-              <strong>Email:</strong> {user.Username}
+              <strong>{user.fullName}</strong> ({user.apartmentNumber})<br />
+              Email: {user.email}<br />
+              Uloga: {user.role} | Status: {user.status}
             </li>
           ))}
         </ul>

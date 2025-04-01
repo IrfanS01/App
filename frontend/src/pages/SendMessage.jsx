@@ -1,56 +1,66 @@
 import { useState } from "react";
 import { sendMessage } from "../api/messages";
+import Navbar from "../components/Navbar";
+import useFetchStatus from "../hooks/useFetchStatus";
 
 const SendMessage = () => {
   const [toEmail, setToEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState("");
+  const { loading, error, success, start, finish, reset } = useFetchStatus();
 
   const handleSend = async (e) => {
     e.preventDefault();
-    setStatus("");
+    reset();
 
     const from = localStorage.getItem("userEmail");
     if (!from) {
-      setStatus("Niste logovani.");
+      finish({ errorMessage: "Niste logovani." });
       return;
     }
 
-    const { success, error } = await sendMessage({ from, to: toEmail, message });
+    start();
+    const { success: ok, error: err } = await sendMessage({ from, to: toEmail, message });
 
-    if (success) {
-      setStatus("Poruka poslana.");
+    if (ok) {
+      finish({ successMessage: "Poruka poslana." });
       setToEmail("");
       setMessage("");
     } else {
-      setStatus(error || "Greška.");
+      finish({ errorMessage: err || "Greška prilikom slanja." });
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Pošalji poruku</h2>
-      {status && <p>{status}</p>}
-      <form onSubmit={handleSend} style={styles.form}>
-        <input
-          name="toEmail"
-          type="email"
-          placeholder="Email primatelja"
-          value={toEmail}
-          onChange={(e) => setToEmail(e.target.value)}
-          required
-          style={styles.input}
-        />
-        <textarea
-          name="message"
-          placeholder="Poruka"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          required
-          style={styles.textarea}
-        />
-        <button type="submit" style={styles.button}>Pošalji</button>
-      </form>
+    <div>
+      <Navbar />
+      <div style={styles.container}>
+        <h2>Pošalji poruku</h2>
+
+        {loading && <p>⏳ Slanje...</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {success && <p style={{ color: "green" }}>{success}</p>}
+
+        <form onSubmit={handleSend} style={styles.form}>
+          <input
+            name="toEmail"
+            type="email"
+            placeholder="Email primatelja"
+            value={toEmail}
+            onChange={(e) => setToEmail(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <textarea
+            name="message"
+            placeholder="Poruka"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            required
+            style={styles.textarea}
+          />
+          <button type="submit" style={styles.button}>Pošalji</button>
+        </form>
+      </div>
     </div>
   );
 };
