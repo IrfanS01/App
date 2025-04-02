@@ -4,17 +4,21 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Obriši JWT token
-    navigate("/login");               // Vrati korisnika na login stranicu
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("role");
+    localStorage.removeItem("fullName");
+    localStorage.removeItem("apartmentNumber");
+    navigate("/login");
   };
 
   return (
     <nav style={styles.nav}>
-      <ul style={styles.ul}>
+      <ul className="nav-ul" style={styles.ul}>
         <li><Link to="/dashboard" style={styles.link}>Dashboard</Link></li>
         <li><Link to="/reservations" style={styles.link}>Reservations</Link></li>
         <li><Link to="/users" style={styles.link}>Users</Link></li>
-        <li><Link to="/inbox">Poruke</Link></li>
+        <li><Link to="/inbox" style={styles.link}>Poruke</Link></li>
         <li><button onClick={handleLogout} style={styles.logoutButton}>Logout</button></li>
       </ul>
     </nav>
@@ -33,6 +37,7 @@ const styles = {
     gap: "1rem",
     margin: 0,
     padding: 0,
+    flexWrap: "wrap", // ovo pomaže i na većim ekranima
   },
   link: {
     color: "white",

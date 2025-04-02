@@ -5,7 +5,6 @@ import fetchHelper from "../api/fetchHelper";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  console.log("🔗 API URL (env):", process.env.REACT_APP_API_URL);
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
@@ -24,8 +23,8 @@ const Login = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       localStorage.setItem("userEmail", email);
-      localStorage.setItem("fullName", data.fullName);           // ✅ NOVO
-      localStorage.setItem("apartmentNumber", data.apartmentNumber); // ✅ NOVO
+      localStorage.setItem("fullName", data.fullName);
+      localStorage.setItem("apartmentNumber", data.apartmentNumber);
       navigate("/dashboard");
     } else {
       setErrorMsg(error);
@@ -33,10 +32,10 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="container center-text" style={styles.container}>
       <h2>Login</h2>
       {errorMsg && <p style={styles.error}>{errorMsg}</p>}
-      <form onSubmit={handleLogin} style={styles.form}>
+      <form onSubmit={handleLogin} className="form" style={styles.form}>
         <input
           name="email"
           type="email"
@@ -44,7 +43,7 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
-          style={styles.input}
+          className="input"
           required
         />
         <input
@@ -54,20 +53,18 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
-          style={styles.input}
+          className="input"
           required
         />
-        <button type="submit" style={styles.button}>Sign in</button>
+        <button type="submit" className="button">Sign in</button>
       </form>
     </div>
   );
 };
 
 const styles = {
-  container: { maxWidth: "400px", margin: "auto", padding: "1rem", textAlign: "center" },
+  container: { maxWidth: "400px", margin: "auto", padding: "1rem" },
   form: { display: "flex", flexDirection: "column", gap: "1rem" },
-  input: { padding: "0.5rem", fontSize: "1rem" },
-  button: { padding: "0.5rem", fontSize: "1rem", backgroundColor: "#4CAF50", color: "white", border: "none", cursor: "pointer" },
   error: { color: "red" },
 };
 

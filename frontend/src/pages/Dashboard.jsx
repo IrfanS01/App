@@ -5,7 +5,7 @@ import useFetchStatus from "../hooks/useFetchStatus";
 
 const Dashboard = () => {
   const [notifications, setNotifications] = useState([]);
-  const { loading, error, success, start, finish } = useFetchStatus();
+  const { loading, error, start, finish } = useFetchStatus();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -21,13 +21,14 @@ const Dashboard = () => {
     };
 
     fetchNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div>
       <Navbar />
-      <div style={styles.container}>
-        <h2>Notifications</h2>
+      <div className="container" style={styles.container}>
+        <h2 className="center-text">Notifications</h2>
 
         {loading && <p>⏳ Učitavanje...</p>}
         {error && <p style={styles.error}>{error}</p>}
@@ -48,14 +49,8 @@ const Dashboard = () => {
 };
 
 const styles = {
-  container: {
-    maxWidth: "600px",
-    margin: "auto",
-    padding: "1rem",
-  },
-  error: {
-    color: "red",
-  },
+  container: { maxWidth: "600px", margin: "auto", padding: "1rem" },
+  error: { color: "red" },
 };
 
 export default Dashboard;

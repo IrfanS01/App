@@ -9,22 +9,23 @@ const Reservations = () => {
   const [date, setDate] = useState("");
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const { loading, error, success, start, finish, reset } = useFetchStatus();
-
-  const fetchReservations = async () => {
-    start();
-    const { success: ok, data, error } = await getReservations();
-    if (ok) {
-      setReservations(data.data);
-      finish();
-    } else {
-      finish({ errorMessage: error });
-    }
-  };
+  const { loading, error, success, start, finish } = useFetchStatus(); // reset izbačen
 
   useEffect(() => {
+    const fetchReservations = async () => {
+      start();
+      const { success: ok, data, error } = await getReservations();
+      if (ok) {
+        setReservations(data.data);
+        finish();
+      } else {
+        finish({ errorMessage: error });
+      }
+    };
+
     fetchReservations();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ✅ Ovdje ne navodimo fetchReservations da spriječimo beskonačan loop
 
   const handleReservation = async (e) => {
     e.preventDefault();
@@ -51,9 +52,13 @@ const Reservations = () => {
 
     if (result.success) {
       finish({ successMessage: "Rezervacija uspješna!" });
-      fetchReservations();
       setType("");
       setDate("");
+      // ponovno dohvaćanje rezervacija
+      const updated = await getReservations();
+      if (updated.success) {
+        setReservations(updated.data.data);
+      }
     } else {
       finish({ errorMessage: result.error || "Greška prilikom rezervacije." });
     }
@@ -62,8 +67,8 @@ const Reservations = () => {
   return (
     <div>
       <Navbar />
-      <div style={styles.container}>
-        <h2>Rezervacije</h2>
+      <div className="container" style={styles.container}>
+        <h2 className="center-text">Rezervacije</h2>
 
         {loading && <p>⏳ Učitavanje...</p>}
         {error && <p style={styles.error}>{error}</p>}
@@ -71,12 +76,13 @@ const Reservations = () => {
         {message && <p style={styles.success}>{message}</p>}
         {errorMsg && <p style={styles.error}>{errorMsg}</p>}
 
-        <form onSubmit={handleReservation} style={styles.form}>
+        <form onSubmit={handleReservation} className="form" style={styles.form}>
           <select
             name="type"
             value={type}
             onChange={(e) => setType(e.target.value)}
             required
+            className="input"
             style={styles.input}
           >
             <option value="">Odaberi tip rezervacije</option>
@@ -90,10 +96,11 @@ const Reservations = () => {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
+            className="input"
             style={styles.input}
           />
 
-          <button type="submit" style={styles.button}>Rezerviši</button>
+          <button type="submit" className="button" style={styles.button}>Rezerviši</button>
         </form>
 
         <ul>
