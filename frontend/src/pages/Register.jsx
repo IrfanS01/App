@@ -23,7 +23,7 @@ const Register = () => {
     }
 
     if (password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters long.");
+      setErrorMsg("Password must be at least 6 characters.");
       return;
     }
 
@@ -39,68 +39,54 @@ const Register = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="container center-text">
       <h2>Register</h2>
-      {message && <p style={styles.success}>{message}</p>}
-      {errorMsg && <p style={styles.error}>{errorMsg}</p>}
-      <form onSubmit={handleRegister} style={styles.form}>
+      {message && <p style={{ color: "green" }}>{message}</p>}
+      {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
+      <form onSubmit={handleRegister} className="form">
         <input
-          name="fullName"
           type="text"
+          className="input"
           placeholder="Full Name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          style={styles.input}
           required
         />
         <input
-          name="apartmentNumber"
           type="text"
+          className="input"
           placeholder="Apartment Number"
           value={apartmentNumber}
           onChange={(e) => setApartmentNumber(e.target.value)}
-          style={styles.input}
           required
         />
         <input
-          name="email"
           type="email"
+          className="input"
           placeholder="Email Address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
           required
         />
         <input
-          name="password"
           type="password"
+          className="input"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
           required
         />
         <input
-          name="roleCode"
           type="text"
-          placeholder="Tajni kod (samo za admina)"
+          className="input"
+          placeholder="Tajni kod (ako imaš)"
           value={roleCode}
           onChange={(e) => setRoleCode(e.target.value)}
-          style={styles.input}
         />
-        <button type="submit" style={styles.button}>Sign Up</button>
+        <button type="submit" className="button">Sign Up</button>
       </form>
     </div>
   );
-};
-
-const styles = {
-  container: { maxWidth: "400px", margin: "auto", padding: "1rem", textAlign: "center" },
-  form: { display: "flex", flexDirection: "column", gap: "1rem" },
-  input: { padding: "0.5rem", fontSize: "1rem" },
-  button: { padding: "0.5rem", fontSize: "1rem", backgroundColor: "#4CAF50", color: "white", border: "none", cursor: "pointer" },
-  error: { color: "red" },
-  success: { color: "green" },
 };
 
 export default Register;

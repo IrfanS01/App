@@ -22,13 +22,15 @@ const Users = () => {
     };
 
     fetchUsers();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ✅ Ne navodimo fetchUsers, jer se onda stalno poziva iznova
 
   return (
     <div>
       <Navbar />
-      <div style={styles.container}>
-        <h2>Residents List</h2>
+      <div className="container" style={styles.container}>
+        <h2 className="center-text">Residents List</h2>
+
         {loading && <p>⏳ Učitavanje...</p>}
         {error && <p style={styles.error}>{error}</p>}
         {success && <p style={styles.success}>{success}</p>}

@@ -76,21 +76,38 @@ const login = async (event) => {
     const authResult = await cognito.initiateAuth(params).promise();
     const token = authResult.AuthenticationResult.IdToken;
 
-    const userDetails = await cognito.getUser({
-      AccessToken: authResult.AuthenticationResult.AccessToken
-    }).promise();
+    // 🔎 Dohvati korisničke atribute
+    const userDetails = await cognito
+      .getUser({
+        AccessToken: authResult.AuthenticationResult.AccessToken,
+      })
+      .promise();
 
-    const roleAttr = userDetails.UserAttributes.find(attr => attr.Name === "custom:role");
+    // ✅ Provjeri da li je email potvrđen
+    const emailVerified = userDetails.UserAttributes.find(
+      (attr) => attr.Name === "email_verified"
+    )?.Value;
+
+    if (emailVerified !== "true") {
+      return response.error(
+        "Email nije verifikovan. Provjerite svoj inbox i kliknite na verifikacijski link."
+      );
+    }
+
+    // 🎭 Dohvati ulogu iz Cognito custom atributa
+    const roleAttr = userDetails.UserAttributes.find(
+      (attr) => attr.Name === "custom:role"
+    );
     const userRole = roleAttr ? roleAttr.Value : "user";
 
-    // ✅ DOHVATI dodatne korisničke podatke iz DynamoDB
-    const keyName = process.env.USERS_TABLE_PRIMARY_KEY;
-const userData = await dynamoDB.get({
-  TableName: process.env.USERS_TABLE,
-  Key: { [keyName]: body.email } // ✅ fleksibilno
-}).promise();
-
-    
+    // ✅ Dohvati dodatne korisničke podatke iz DynamoDB
+    const keyName = process.env.USERS_TABLE_PRIMARY_KEY || "userId";
+    const userData = await dynamoDB
+      .get({
+        TableName: process.env.USERS_TABLE,
+        Key: { [keyName]: email },
+      })
+      .promise();
 
     const fullName = userData.Item?.fullName || "";
     const apartmentNumber = userData.Item?.apartmentNumber || "";
@@ -101,6 +118,7 @@ const userData = await dynamoDB.get({
     return response.error("Prijava neuspješna: " + error.message);
   }
 };
+
 
 
 // ✅ EXPORTI – zajednički
