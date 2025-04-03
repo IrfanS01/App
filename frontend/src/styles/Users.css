@@ -1,0 +1,46 @@
+.users-container {
+    max-width: 700px;
+    margin: auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .users-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .user-card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .users-error {
+    color: red;
+    font-weight: 500;
+    text-align: center;
+  }
+  
+  .users-success {
+    color: green;
+    font-weight: 500;
+    text-align: center;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .users-container {
+      padding: 1rem;
+      border-radius: 0;
+    }
+  
+    .user-card {
+      font-size: 0.95rem;
+    }
+  }
+  

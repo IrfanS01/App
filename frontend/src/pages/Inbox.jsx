@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { getMessages } from "../api/messages";
 import Navbar from "../components/Navbar";
+import "../styles/Inbox.css";
 
 const Inbox = () => {
   const [messages, setMessages] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    const fetchData = async () => {
       const email = localStorage.getItem("userEmail");
       if (!email) {
         setErrorMsg("Niste logovani.");
@@ -19,25 +20,25 @@ const Inbox = () => {
       if (success) {
         setMessages(Array.isArray(data?.data) ? data.data : []);
       } else {
-        setErrorMsg(error || "Greška prilikom dohvaćanja poruka.");
+        setErrorMsg(error || "Greška.");
       }
     };
 
-    fetchMessages();
+    fetchData();
   }, []);
 
   return (
     <div>
       <Navbar />
-      <div style={styles.container}>
-        <h2>Primljene poruke</h2>
-
-        {errorMsg && <p style={styles.error}>{errorMsg}</p>}
-        {messages.length === 0 && !errorMsg && <p>Nema poruka.</p>}
-
-        <ul style={styles.list}>
+      <div className="inbox-container">
+        <h2 className="inbox-title">Primljene poruke</h2>
+        {errorMsg && <p className="inbox-error">{errorMsg}</p>}
+        {!errorMsg && messages.length === 0 && (
+          <p className="inbox-empty">Nema poruka.</p>
+        )}
+        <ul style={{ padding: 0, listStyle: "none" }}>
           {messages.map((msg) => (
-            <li key={msg.id} style={styles.message}>
+            <li key={msg.id} className="message-card">
               <strong>Od: {msg.from}</strong>
               <p>{msg.message}</p>
               <small>{new Date(msg.createdAt).toLocaleString()}</small>
@@ -47,19 +48,6 @@ const Inbox = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: { maxWidth: "600px", margin: "auto", padding: "1rem" },
-  error: { color: "red" },
-  list: { listStyle: "none", padding: 0 },
-  message: {
-    border: "1px solid #ccc",
-    padding: "1rem",
-    borderRadius: "8px",
-    marginBottom: "1rem",
-    backgroundColor: "#f4f4f4",
-  },
 };
 
 export default Inbox;

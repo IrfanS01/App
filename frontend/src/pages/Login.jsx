@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import fetchHelper from "../api/fetchHelper";
+import Navbar from "../components/Navbar";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -32,40 +33,37 @@ const Login = () => {
   };
 
   return (
-    <div className="container center-text" style={styles.container}>
-      <h2>Login</h2>
-      {errorMsg && <p style={styles.error}>{errorMsg}</p>}
-      <form onSubmit={handleLogin} className="form" style={styles.form}>
-        <input
-          name="email"
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          className="input"
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          className="input"
-          required
-        />
-        <button type="submit" className="button">Sign in</button>
-      </form>
-    </div>
+    <>
+      <Navbar />
+      <div className="container">
+        <h2 className="center-text">Login</h2>
+        {errorMsg && <p className="error">{errorMsg}</p>}
+        <form onSubmit={handleLogin} className="form">
+          <input
+            name="email"
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            className="input"
+            required
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            className="input"
+            required
+          />
+          <button type="submit" className="button">Sign in</button>
+        </form>
+      </div>
+    </>
   );
-};
-
-const styles = {
-  container: { maxWidth: "400px", margin: "auto", padding: "1rem" },
-  form: { display: "flex", flexDirection: "column", gap: "1rem" },
-  error: { color: "red" },
 };
 
 export default Login;
