@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { getUsers } from "../api/users";
 import useFetchStatus from "../hooks/useFetchStatus";
+import "../styles/Users.css";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -23,22 +24,22 @@ const Users = () => {
 
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // ✅ Ne navodimo fetchUsers, jer se onda stalno poziva iznova
+  }, []);
 
   return (
     <div>
       <Navbar />
-      <div className="container" style={styles.container}>
-        <h2 className="center-text">Residents List</h2>
+      <div className="users-container">
+        <h2 className="users-title">Lista stanara</h2>
 
         {loading && <p>⏳ Učitavanje...</p>}
-        {error && <p style={styles.error}>{error}</p>}
-        {success && <p style={styles.success}>{success}</p>}
-        {users.length === 0 && !loading && <p>No registered users.</p>}
+        {error && <p className="users-error">{error}</p>}
+        {success && <p className="users-success">{success}</p>}
+        {users.length === 0 && !loading && <p>Nema registrovanih korisnika.</p>}
 
-        <ul>
+        <ul style={{ padding: 0, listStyle: "none" }}>
           {users.map((user, index) => (
-            <li key={index}>
+            <li key={index} className="user-card">
               <strong>{user.fullName}</strong> ({user.apartmentNumber})<br />
               Email: {user.email}<br />
               Uloga: {user.role} | Status: {user.status}
@@ -48,12 +49,6 @@ const Users = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: { maxWidth: "600px", margin: "auto", padding: "1rem" },
-  error: { color: "red" },
-  success: { color: "green" },
 };
 
 export default Users;

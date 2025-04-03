@@ -1,57 +1,55 @@
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "../styles/Navbar.css";
 
 const Navbar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    setIsLoggedIn(!!token);
+    setIsAdmin(role === "admin");
+  }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("role");
-    localStorage.removeItem("fullName");
-    localStorage.removeItem("apartmentNumber");
+    localStorage.clear();
     navigate("/login");
   };
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
-    <nav style={styles.nav}>
-      <ul className="nav-ul" style={styles.ul}>
-        <li><Link to="/dashboard" style={styles.link}>Dashboard</Link></li>
-        <li><Link to="/reservations" style={styles.link}>Reservations</Link></li>
-        <li><Link to="/users" style={styles.link}>Users</Link></li>
-        <li><Link to="/inbox" style={styles.link}>Poruke</Link></li>
-        <li><button onClick={handleLogout} style={styles.logoutButton}>Logout</button></li>
+    <nav className="navbar">
+      <div className="nav-header">
+        <button onClick={toggleMenu} className="burger">☰</button>
+        <h3 className="nav-title">MinApp</h3>
+      </div>
+
+      <ul className={`nav-list ${menuOpen ? "open" : ""}`}>
+        {isLoggedIn ? (
+          <>
+            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="/reservations">Reservations</Link></li>
+            {isAdmin && <li><Link to="/users">Users</Link></li>}
+            <li><Link to="/inbox">Poruke</Link></li>
+            <li><button onClick={handleLogout} className="logout-button">Logout</button></li>
+          </>
+        ) : (
+          <>
+            <li><Link to="/login">Login</Link></li>
+            <li><Link to="/register">Register</Link></li>
+          </>
+        )}
       </ul>
     </nav>
   );
-};
-
-const styles = {
-  nav: {
-    backgroundColor: "#4CAF50",
-    padding: "1rem",
-  },
-  ul: {
-    listStyle: "none",
-    display: "flex",
-    justifyContent: "center",
-    gap: "1rem",
-    margin: 0,
-    padding: 0,
-    flexWrap: "wrap", // ovo pomaže i na većim ekranima
-  },
-  link: {
-    color: "white",
-    textDecoration: "none",
-    fontWeight: "bold",
-  },
-  logoutButton: {
-    backgroundColor: "#f44336",
-    color: "white",
-    border: "none",
-    padding: "0.5rem 1rem",
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
 };
 
 export default Navbar;

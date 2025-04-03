@@ -1,89 +1,99 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import fetchHelper from "../api/fetchHelper";
+import { register } from "../api/auth";
+import "../styles/Register.css"; // ✅ Dodaj ovo
 
 const Register = () => {
-  const [fullName, setFullName] = useState("");
-  const [apartmentNumber, setApartmentNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [roleCode, setRoleCode] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    apartmentNumber: "",
+    roleCode: "",
+  });
+
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
     setErrorMsg("");
+    setMessage("");
 
-    if (!fullName || !apartmentNumber || !email || !password) {
-      setErrorMsg("All fields are required.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters.");
-      return;
-    }
-
-    const payload = { email, password, fullName, apartmentNumber, roleCode };
-    const { success, error } = await fetchHelper("/auth/register", "POST", payload, false);
+    const { success, data, error } = await register(formData);
 
     if (success) {
-      setMessage("Registration successful. Please check your email.");
-      setTimeout(() => navigate("/login"), 3000);
+      setMessage(data.data.message);
+      setFormData({
+        email: "",
+        password: "",
+        fullName: "",
+        apartmentNumber: "",
+        roleCode: "",
+      });
     } else {
       setErrorMsg(error);
     }
   };
 
   return (
-    <div className="container center-text">
-      <h2>Register</h2>
-      {message && <p style={{ color: "green" }}>{message}</p>}
-      {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
-      <form onSubmit={handleRegister} className="form">
+    <div className="register-container">
+      <h2>Registracija</h2>
+      {message && <p className="register-success">{message}</p>}
+      {errorMsg && <p className="register-error">{errorMsg}</p>}
+
+      <form onSubmit={handleSubmit} className="register-form">
         <input
+          name="fullName"
           type="text"
-          className="input"
-          placeholder="Full Name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          placeholder="Ime i prezime"
+          value={formData.fullName}
+          onChange={handleChange}
+          className="register-input"
           required
         />
         <input
+          name="apartmentNumber"
           type="text"
-          className="input"
-          placeholder="Apartment Number"
-          value={apartmentNumber}
-          onChange={(e) => setApartmentNumber(e.target.value)}
+          placeholder="Broj stana (npr. A1301)"
+          value={formData.apartmentNumber}
+          onChange={handleChange}
+          className="register-input"
           required
         />
         <input
+          name="email"
           type="email"
-          className="input"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email adresa"
+          value={formData.email}
+          onChange={handleChange}
+          className="register-input"
           required
         />
         <input
+          name="password"
           type="password"
-          className="input"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Lozinka"
+          value={formData.password}
+          onChange={handleChange}
+          className="register-input"
           required
         />
         <input
+          name="roleCode"
           type="text"
-          className="input"
-          placeholder="Tajni kod (ako imaš)"
-          value={roleCode}
-          onChange={(e) => setRoleCode(e.target.value)}
+          placeholder="Admin kod (opcionalno)"
+          value={formData.roleCode}
+          onChange={handleChange}
+          className="register-input"
         />
-        <button type="submit" className="button">Sign Up</button>
+        <button type="submit" className="register-button">Registruj se</button>
       </form>
     </div>
   );
