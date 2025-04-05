@@ -14,18 +14,18 @@ const SendMessage = () => {
 
     const from = localStorage.getItem("userEmail");
     if (!from) {
-      setStatus("Niste logovani.");
+      setStatus("You are not logged in.");
       return;
     }
 
     const { success, error } = await sendMessage({ from, to: toEmail, message });
 
     if (success) {
-      setStatus("✅ Poruka poslana.");
+      setStatus("✅ Message sent.");
       setToEmail("");
       setMessage("");
     } else {
-      setStatus(`❌ ${error || "Greška."}`);
+      setStatus(`❌ ${error || "Error sending message."}`);
     }
   };
 
@@ -33,13 +33,13 @@ const SendMessage = () => {
     <div>
       <Navbar />
       <div className="send-container">
-        <h2 className="send-title">Pošalji poruku</h2>
+        <h2 className="send-title">Send Message</h2>
         {status && <p className="send-status">{status}</p>}
         <form onSubmit={handleSend} className="send-form">
           <input
             name="toEmail"
             type="email"
-            placeholder="Email primatelja"
+            placeholder="Recipient's email"
             value={toEmail}
             onChange={(e) => setToEmail(e.target.value)}
             required
@@ -47,13 +47,13 @@ const SendMessage = () => {
           />
           <textarea
             name="message"
-            placeholder="Poruka"
+            placeholder="Your message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             required
             className="send-textarea"
           />
-          <button type="submit" className="send-button">Pošalji</button>
+          <button type="submit" className="send-button">Send</button>
         </form>
       </div>
     </div>

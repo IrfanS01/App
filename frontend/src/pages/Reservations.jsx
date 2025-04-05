@@ -40,7 +40,7 @@ const Reservations = () => {
     const apartmentNumber = localStorage.getItem("apartmentNumber");
 
     if (!userEmail || !fullName || !apartmentNumber) {
-      finish({ errorMessage: "Nedostaje info. Prijavite se ponovo." });
+      finish({ errorMessage: "Missing user info. Please log in again." });
       return;
     }
 
@@ -53,7 +53,7 @@ const Reservations = () => {
     });
 
     if (result.success) {
-      finish({ successMessage: "Rezervacija uspješna!" });
+      finish({ successMessage: "Reservation successful!" });
       setType("");
       setDate("");
       const updated = await getReservations();
@@ -61,23 +61,23 @@ const Reservations = () => {
         setReservations(updated.data.data);
       }
     } else {
-      finish({ errorMessage: result.error || "Greška prilikom rezervacije." });
+      finish({ errorMessage: result.error || "Error while creating reservation." });
     }
   };
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Jeste li sigurni da želite obrisati rezervaciju?");
+    const confirm = window.confirm("Are you sure you want to delete this reservation?");
     if (!confirm) return;
 
     const { success, error } = await deleteReservation(id);
     if (success) {
-      setMessage("Rezervacija obrisana.");
+      setMessage("Reservation deleted.");
       const updated = await getReservations();
       if (updated.success) {
         setReservations(updated.data.data);
       }
     } else {
-      setErrorMsg(error || "Greška prilikom brisanja.");
+      setErrorMsg(error || "Error while deleting reservation.");
     }
   };
 
@@ -85,9 +85,9 @@ const Reservations = () => {
     <div>
       <Navbar />
       <div className="reservations-container">
-        <h2 className="center-text">Rezervacije</h2>
+        <h2 className="center-text">Reservations</h2>
 
-        {loading && <p>⏳ Učitavanje...</p>}
+        {loading && <p>⏳ Loading...</p>}
         {error && <p className="reservation-error">{error}</p>}
         {success && <p className="reservation-success">{success}</p>}
         {message && <p className="reservation-success">{message}</p>}
@@ -101,9 +101,9 @@ const Reservations = () => {
             required
             className="reservation-select"
           >
-            <option value="">Odaberi tip rezervacije</option>
-            <option value="overnattningslagenhet">Övernattningslägenhet</option>
-            <option value="takterras">Takterras</option>
+            <option value="">Select reservation type</option>
+            <option value="overnattningslagenhet">Guest apartment</option>
+            <option value="takterras">Rooftop terrace</option>
           </select>
 
           <input
@@ -115,22 +115,24 @@ const Reservations = () => {
             className="reservation-input"
           />
 
-          <button type="submit" className="reservation-button">Rezerviši</button>
+          <button type="submit" className="reservation-button">Reserve</button>
         </form>
 
         <ul style={{ listStyle: "none", padding: 0 }}>
           {reservations.map((res) => (
             <li key={res.id} className="reservation-item">
-              <strong>{res.userName || "Nepoznato"} (Stan {res.apartmentNumber || "?"})</strong>
-              <div className="reservation-date">Datum: {res.date}</div>
-              <div className="reservation-type">Rezervisano: {res.type === "overnattningslagenhet" ? "Övernattningslägenhet" : "Takterras"}</div>
-              <div><a href={`mailto:${res.user}`}>Kontakt</a></div>
+              <strong>{res.userName || "Unknown"} (Apt. {res.apartmentNumber || "?"})</strong>
+              <div className="reservation-date">Date: {res.date}</div>
+              <div className="reservation-type">
+                Reserved for: {res.type === "overnattningslagenhet" ? "Guest apartment" : "Rooftop terrace"}
+              </div>
+              <div><a href={`mailto:${res.user}`}>Contact</a></div>
               {res.user === localStorage.getItem("userEmail") && (
                 <button
                   onClick={() => handleDelete(res.id)}
                   className="reservation-delete-button"
                 >
-                  Obriši
+                  Delete
                 </button>
               )}
             </li>

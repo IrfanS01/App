@@ -20,18 +20,20 @@ const PostNotification = ({ editingNote, onDone }) => {
     e.preventDefault();
     setStatus("");
     const token = localStorage.getItem("token");
-  
+
     const payload = {
       title,
       message,
       userId: localStorage.getItem("userEmail"),
+      fullName: localStorage.getItem("fullName"),
+      apartmentNumber: localStorage.getItem("apartmentNumber"),
     };
-  
+
     const method = editingNote ? "PUT" : "POST";
     const endpoint = editingNote
       ? `/notifications/${editingNote.id}`
       : "/notifications";
-  
+
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}${endpoint}`,
@@ -44,30 +46,29 @@ const PostNotification = ({ editingNote, onDone }) => {
           body: JSON.stringify(payload),
         }
       );
-  
+
       const data = await response.json();
       if (response.ok) {
-        setStatus("Obavijest poslana!");
+        setStatus("Notification sent!");
         setTitle("");
         setMessage("");
         onDone?.();
       } else {
-        setStatus(data.message || "Greška pri slanju.");
+        setStatus(data.message || "Error while sending notification.");
       }
     } catch (error) {
-      setStatus("Greška na mreži.");
+      setStatus("Network error.");
     }
   };
-  
 
   return (
     <div className="container">
-      <h3>{editingNote ? "Uredi obavijest" : "Nova obavijest"}</h3>
+      <h3>{editingNote ? "Edit notification" : "New notification"}</h3>
       {status && <p>{status}</p>}
       <form onSubmit={handleSubmit} className="form">
         <input
           name="title"
-          placeholder="Naslov"
+          placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -75,14 +76,14 @@ const PostNotification = ({ editingNote, onDone }) => {
         />
         <textarea
           name="message"
-          placeholder="Poruka"
+          placeholder="Message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           required
           className="textarea"
-        ></textarea>
+        />
         <button type="submit" className="button">
-          {editingNote ? "Spremi izmjene" : "Objavi"}
+          {editingNote ? "Save changes" : "Publish"}
         </button>
       </form>
     </div>

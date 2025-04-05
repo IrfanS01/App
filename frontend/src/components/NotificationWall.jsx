@@ -2,12 +2,12 @@
 import { useEffect, useState } from "react";
 import PostNotification from "../pages/PostNotification";
 
-
 const NotificationWall = () => {
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState("");
   const [editingNote, setEditingNote] = useState(null);
 
+  // Fetch notifications from backend
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -21,10 +21,10 @@ const NotificationWall = () => {
       if (res.ok) {
         setNotifications(data.data || []);
       } else {
-        setError(data.message || "Greška prilikom dohvatanja obavijesti.");
+        setError(data.message || "Failed to load notifications.");
       }
     } catch (err) {
-      setError("Greška na mreži.");
+      setError("Network error while loading notifications.");
     }
   };
 
@@ -32,8 +32,9 @@ const NotificationWall = () => {
     fetchNotifications();
   }, []);
 
+  // Delete notification by ID
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Da li ste sigurni da želite obrisati ovu obavijest?");
+    const confirm = window.confirm("Are you sure you want to delete this notification?");
     if (!confirm) return;
 
     const token = localStorage.getItem("token");
@@ -55,7 +56,7 @@ const NotificationWall = () => {
 
   return (
     <div className="container">
-      <h2 className="center-text">Obavještenja</h2>
+      <h2 className="center-text">Notifications</h2>
       {error && <p className="error">{error}</p>}
 
       <ul>
@@ -66,18 +67,21 @@ const NotificationWall = () => {
             <small>{new Date(note.createdAt).toLocaleString()}</small>
             {note.userId === localStorage.getItem("userEmail") && (
               <div style={{ marginTop: "0.5rem" }}>
-                <button onClick={() => setEditingNote(note)}>Uredi</button>
-                <button onClick={() => handleDelete(note.id)} style={{ marginLeft: "0.5rem" }}>Obriši</button>
+                <button onClick={() => setEditingNote(note)}>Edit</button>
+                <button onClick={() => handleDelete(note.id)} style={{ marginLeft: "0.5rem" }}>Delete</button>
               </div>
             )}
           </li>
         ))}
       </ul>
 
-      <PostNotification editingNote={editingNote} onDone={() => {
-        setEditingNote(null);
-        fetchNotifications();
-      }} />
+      <PostNotification
+        editingNote={editingNote}
+        onDone={() => {
+          setEditingNote(null);
+          fetchNotifications();
+        }}
+      />
     </div>
   );
 };
