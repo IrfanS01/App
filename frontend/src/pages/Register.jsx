@@ -1,101 +1,99 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
-import "../styles/Register.css"; // ✅ Dodaj ovo
+import Navbar from "../components/Navbar";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
     fullName: "",
     apartmentNumber: "",
-    roleCode: "",
+    email: "",
+    password: "",
+    roleCode: ""
   });
 
-  const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setErrorMsg("");
-    setMessage("");
+    setSuccessMsg("");
 
     const { success, data, error } = await register(formData);
 
     if (success) {
-      setMessage(data.data.message);
-      setFormData({
-        email: "",
-        password: "",
-        fullName: "",
-        apartmentNumber: "",
-        roleCode: "",
-      });
+      setSuccessMsg(data.message || "Registration successful!");
+      setTimeout(() => navigate("/login"), 2000);
     } else {
-      setErrorMsg(error);
+      setErrorMsg(error || "Error during registration.");
     }
   };
 
   return (
-    <div className="register-container">
-      <h2>Registracija</h2>
-      {message && <p className="register-success">{message}</p>}
-      {errorMsg && <p className="register-error">{errorMsg}</p>}
-
-      <form onSubmit={handleSubmit} className="register-form">
-        <input
-          name="fullName"
-          type="text"
-          placeholder="Ime i prezime"
-          value={formData.fullName}
-          onChange={handleChange}
-          className="register-input"
-          required
-        />
-        <input
-          name="apartmentNumber"
-          type="text"
-          placeholder="Broj stana (npr. A1301)"
-          value={formData.apartmentNumber}
-          onChange={handleChange}
-          className="register-input"
-          required
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email adresa"
-          value={formData.email}
-          onChange={handleChange}
-          className="register-input"
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Lozinka"
-          value={formData.password}
-          onChange={handleChange}
-          className="register-input"
-          required
-        />
-        <input
-          name="roleCode"
-          type="text"
-          placeholder="Admin kod (opcionalno)"
-          value={formData.roleCode}
-          onChange={handleChange}
-          className="register-input"
-        />
-        <button type="submit" className="register-button">Registruj se</button>
-      </form>
-    </div>
+    <>
+      <Navbar />
+      <div className="container">
+        <h2 className="center-text">Register</h2>
+        {errorMsg && <p className="error">{errorMsg}</p>}
+        {successMsg && <p className="success">{successMsg}</p>}
+        <form onSubmit={handleRegister} className="form">
+          <input
+            name="fullName"
+            type="text"
+            placeholder="Full Name"
+            value={formData.fullName}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          <input
+            name="apartmentNumber"
+            type="text"
+            placeholder="Apartment Number"
+            value={formData.apartmentNumber}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="Email address"
+            value={formData.email}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          <input
+            name="roleCode"
+            type="text"
+            placeholder="Admin Code (optional)"
+            value={formData.roleCode}
+            onChange={handleChange}
+            className="input"
+          />
+          <button type="submit" className="button">Register</button>
+        </form>
+      </div>
+    </>
   );
 };
 

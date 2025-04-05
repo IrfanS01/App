@@ -103,6 +103,26 @@ module.exports.getReservations = async () => {
       createdAt: res.createdAt || "N/A",
     }));
 
+    module.exports.deleteReservation = async (event) => {
+      const { reservationId, userId } = JSON.parse(event.body);
+    
+      const params = {
+        TableName: process.env.RESERVATIONS_TABLE,
+        Key: {
+          userId,
+          reservationId,
+        },
+      };
+    
+      try {
+        await dynamoDB.delete(params).promise();
+        return response.success({ message: "Reservation deleted." });
+      } catch (err) {
+        return response.error("Failed to delete reservation.", 500, err);
+      }
+    };
+    
+
     return response.success(reservations);
   } catch (error) {
     console.error("DynamoDB Get Reservations Error:", error);

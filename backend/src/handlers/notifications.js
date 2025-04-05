@@ -37,3 +37,21 @@ module.exports.getNotifications = async () => {
         return response.error(error.message);
     }
 };
+module.exports.deleteNotification = async (event) => {
+    const id = event.pathParameters?.id;
+  
+    if (!id) return response.error("ID is required");
+  
+    const params = {
+      TableName: process.env.NOTIFICATIONS_TABLE,
+      Key: { userId: event.requestContext.authorizer.claims.email, id },
+    };
+  
+    try {
+      await dynamoDB.delete(params).promise();
+      return response.success({ message: "Notification deleted" });
+    } catch (error) {
+      return response.error("Delete failed: " + error.message);
+    }
+  };
+  
