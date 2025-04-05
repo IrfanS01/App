@@ -2,6 +2,7 @@ const dynamoDB = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
 const response = require("../utils/response");
 
+// ➕ Kreiranje rezervacije
 module.exports.createReservation = async (event) => {
   let body;
 
@@ -21,6 +22,7 @@ module.exports.createReservation = async (event) => {
     return response.error("Table environment variables are missing.");
   }
 
+  // ✅ Provjera duplikata
   try {
     const existing = await dynamoDB.scan({
       TableName: process.env.RESERVATIONS_TABLE,
@@ -45,13 +47,13 @@ module.exports.createReservation = async (event) => {
     return response.error("Database error while checking existing reservations.");
   }
 
-  // ➕ Dohvati korisničke podatke iz USERS_TABLE
+  // ➕ Dohvati korisničke podatke
   let userDetails;
   try {
     const keyName = process.env.USERS_TABLE_PRIMARY_KEY;
     const result = await dynamoDB.get({
       TableName: process.env.USERS_TABLE,
-      Key: { [keyName]: body.user }, // ✅ dinamički ključ
+      Key: { [keyName]: body.user },
     }).promise();
 
     userDetails = result.Item || {};
@@ -85,6 +87,7 @@ module.exports.createReservation = async (event) => {
   }
 };
 
+// 📥 Dohvati sve rezervacije
 module.exports.getReservations = async () => {
   const params = {
     TableName: process.env.RESERVATIONS_TABLE,
@@ -103,29 +106,29 @@ module.exports.getReservations = async () => {
       createdAt: res.createdAt || "N/A",
     }));
 
-    module.exports.deleteReservation = async (event) => {
-      const { reservationId, userId } = JSON.parse(event.body);
-    
-      const params = {
-        TableName: process.env.RESERVATIONS_TABLE,
-        Key: {
-          userId,
-          reservationId,
-        },
-      };
-    
-      try {
-        await dynamoDB.delete(params).promise();
-        return response.success({ message: "Reservation deleted." });
-      } catch (err) {
-        return response.error("Failed to delete reservation.", 500, err);
-      }
-    };
-    
-
     return response.success(reservations);
   } catch (error) {
     console.error("DynamoDB Get Reservations Error:", error);
     return response.error("Error fetching reservations.");
+  }
+};
+
+// ❌ Brisanje rezervacije
+module.exports.deleteReservation = async (event) => {
+  const { reservationId, userId } = JSON.parse(event.body);
+
+  const params = {
+    TableName: process.env.RESERVATIONS_TABLE,
+    Key: {
+      userId,
+      reservationId,
+    },
+  };
+
+  try {
+    await dynamoDB.delete(params).promise();
+    return response.success({ message: "Reservation deleted." });
+  } catch (err) {
+    return response.error("Failed to delete reservation.", 500, err);
   }
 };
