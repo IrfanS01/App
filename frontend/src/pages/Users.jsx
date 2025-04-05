@@ -16,9 +16,9 @@ const Users = () => {
 
       if (ok) {
         setUsers(Array.isArray(data?.data) ? data.data : []);
-        finish({ successMessage: "Učitano korisnika: " + data.data.length });
+        finish({ successMessage: "Users loaded: " + data.data.length });
       } else {
-        finish({ errorMessage: err || "Greška prilikom učitavanja korisnika." });
+        finish({ errorMessage: err || "Error loading users." });
       }
     };
 
@@ -30,19 +30,19 @@ const Users = () => {
     <div>
       <Navbar />
       <div className="users-container">
-        <h2 className="users-title">Lista stanara</h2>
+        <h2 className="users-title">Resident List</h2>
 
-        {loading && <p>⏳ Učitavanje...</p>}
+        {loading && <p>⏳ Loading...</p>}
         {error && <p className="users-error">{error}</p>}
         {success && <p className="users-success">{success}</p>}
-        {users.length === 0 && !loading && <p>Nema registrovanih korisnika.</p>}
+        {users.length === 0 && !loading && <p>No registered users.</p>}
 
         <ul style={{ padding: 0, listStyle: "none" }}>
           {users.map((user, index) => (
             <li key={index} className="user-card">
-              <strong>{user.fullName}</strong> ({user.apartmentNumber})<br />
+              <strong>{user.fullName}</strong> (Apt. {user.apartmentNumber})<br />
               Email: {user.email}<br />
-              Uloga: {user.role} | Status: {user.status}
+              Role: {user.role} | Status: {user.status}
             </li>
           ))}
         </ul>

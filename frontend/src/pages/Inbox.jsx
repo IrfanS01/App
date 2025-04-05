@@ -11,7 +11,7 @@ const Inbox = () => {
     const fetchData = async () => {
       const email = localStorage.getItem("userEmail");
       if (!email) {
-        setErrorMsg("Niste logovani.");
+        setErrorMsg("You are not logged in.");
         return;
       }
 
@@ -20,7 +20,7 @@ const Inbox = () => {
       if (success) {
         setMessages(Array.isArray(data?.data) ? data.data : []);
       } else {
-        setErrorMsg(error || "Greška.");
+        setErrorMsg(error || "Error fetching messages.");
       }
     };
 
@@ -31,15 +31,15 @@ const Inbox = () => {
     <div>
       <Navbar />
       <div className="inbox-container">
-        <h2 className="inbox-title">Primljene poruke</h2>
+        <h2 className="inbox-title">Inbox</h2>
         {errorMsg && <p className="inbox-error">{errorMsg}</p>}
         {!errorMsg && messages.length === 0 && (
-          <p className="inbox-empty">Nema poruka.</p>
+          <p className="inbox-empty">No messages.</p>
         )}
         <ul style={{ padding: 0, listStyle: "none" }}>
           {messages.map((msg) => (
             <li key={msg.id} className="message-card">
-              <strong>Od: {msg.from}</strong>
+              <strong>From: {msg.from}</strong>
               <p>{msg.message}</p>
               <small>{new Date(msg.createdAt).toLocaleString()}</small>
             </li>

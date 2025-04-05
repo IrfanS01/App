@@ -38,7 +38,7 @@ const Navbar = () => {
             <li><Link to="/dashboard">Dashboard</Link></li>
             <li><Link to="/reservations">Reservations</Link></li>
             {isAdmin && <li><Link to="/users">Users</Link></li>}
-            <li><Link to="/inbox">Poruke</Link></li>
+            <li><Link to="/inbox">Messages</Link></li>
             <li><button onClick={handleLogout} className="logout-button">Logout</button></li>
           </>
         ) : (

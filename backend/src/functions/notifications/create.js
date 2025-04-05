@@ -13,11 +13,13 @@ module.exports.handler = async (event) => {
   const params = {
     TableName: process.env.NOTIFICATIONS_TABLE,
     Item: {
-      id: uuidv4(),
-      title: body.title,
-      message: body.message,
-      userId: body.userId,
-      createdAt: new Date().toISOString(),
+        id: uuidv4(),
+        title: body.title,
+        message: body.message,
+        userId: body.userId,
+        fullName: body.fullName || "Nepoznat korisnik",
+        apartmentNumber: body.apartmentNumber || "?",
+        createdAt: new Date().toISOString(),
     },
   };
 
