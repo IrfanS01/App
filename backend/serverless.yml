@@ -13,7 +13,7 @@ provider:
     USERS_TABLE: ${env:USERS_TABLE}
     NOTIFICATIONS_TABLE: ${env:NOTIFICATIONS_TABLE}
     MESSAGES_TABLE: ${env:MESSAGES_TABLE}
-    USERS_TABLE_PRIMARY_KEY: ${env:USERS_TABLE_PRIMARY_KEY}  # ✅ Dodaj ovu liniju
+    USERS_TABLE_PRIMARY_KEY: ${env:USERS_TABLE_PRIMARY_KEY}
     CORS_ORIGIN: ${env:CORS_ORIGIN}
 
 functions:
@@ -82,6 +82,19 @@ functions:
               - Authorization
             allowCredentials: false
 
+  deleteNotification:
+    handler: src/handlers/notifications.deleteNotification
+    events:
+      - http:
+          path: notifications/{id}
+          method: delete
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+
   createReservation:
     handler: src/handlers/reservations.createReservation
     events:
@@ -101,6 +114,19 @@ functions:
       - http:
           path: reservations
           method: get
+          cors:
+            origin: 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+
+  deleteReservation:
+    handler: src/handlers/reservations.deleteReservation
+    events:
+      - http:
+          path: reservations/delete
+          method: post
           cors:
             origin: 'http://localhost:3000'
             headers:
