@@ -57,7 +57,7 @@ functions:
             allowCredentials: false
 
   createNotification:
-    handler: src/handlers/notifications.createNotification
+    handler: src/functions/notifications/create.handler
     events:
       - http:
           path: notifications
@@ -70,7 +70,7 @@ functions:
             allowCredentials: false
 
   getNotifications:
-    handler: src/handlers/notifications.getNotifications
+    handler: src/functions/notifications/get.handler
     events:
       - http:
           path: notifications
@@ -83,7 +83,7 @@ functions:
             allowCredentials: false
 
   deleteNotification:
-    handler: src/handlers/notifications.deleteNotification
+    handler: src/functions/notifications/delete.handler
     events:
       - http:
           path: notifications/{id}

@@ -20,13 +20,18 @@ const PostNotification = ({ editingNote, onDone }) => {
     e.preventDefault();
     setStatus("");
     const token = localStorage.getItem("token");
-
-    const payload = { title, message };
+  
+    const payload = {
+      title,
+      message,
+      userId: localStorage.getItem("userEmail"),
+    };
+  
     const method = editingNote ? "PUT" : "POST";
     const endpoint = editingNote
       ? `/notifications/${editingNote.id}`
       : "/notifications";
-
+  
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}${endpoint}`,
@@ -39,7 +44,7 @@ const PostNotification = ({ editingNote, onDone }) => {
           body: JSON.stringify(payload),
         }
       );
-
+  
       const data = await response.json();
       if (response.ok) {
         setStatus("Obavijest poslana!");
@@ -53,6 +58,7 @@ const PostNotification = ({ editingNote, onDone }) => {
       setStatus("Greška na mreži.");
     }
   };
+  
 
   return (
     <div className="container">
