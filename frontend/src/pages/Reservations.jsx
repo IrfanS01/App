@@ -1,7 +1,9 @@
+// Reservations.jsx
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import { getReservations, createReservation } from "../api/reservations";
+import { getReservations, createReservation, deleteReservation } from "../api/reservations";
 import useFetchStatus from "../hooks/useFetchStatus";
+import "../styles/Reservations.css";
 
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
@@ -63,26 +65,41 @@ const Reservations = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    const confirm = window.confirm("Jeste li sigurni da želite obrisati rezervaciju?");
+    if (!confirm) return;
+
+    const { success, error } = await deleteReservation(id);
+    if (success) {
+      setMessage("Rezervacija obrisana.");
+      const updated = await getReservations();
+      if (updated.success) {
+        setReservations(updated.data.data);
+      }
+    } else {
+      setErrorMsg(error || "Greška prilikom brisanja.");
+    }
+  };
+
   return (
     <div>
       <Navbar />
-      <div className="container center-text">
+      <div className="reservations-container">
         <h2 className="center-text">Rezervacije</h2>
 
         {loading && <p>⏳ Učitavanje...</p>}
-        {error && <p style={styles.error}>{error}</p>}
-        {success && <p style={styles.success}>{success}</p>}
-        {message && <p style={styles.success}>{message}</p>}
-        {errorMsg && <p style={styles.error}>{errorMsg}</p>}
+        {error && <p className="reservation-error">{error}</p>}
+        {success && <p className="reservation-success">{success}</p>}
+        {message && <p className="reservation-success">{message}</p>}
+        {errorMsg && <p className="reservation-error">{errorMsg}</p>}
 
-        <form onSubmit={handleReservation} className="form" style={styles.form}>
+        <form onSubmit={handleReservation} className="reservation-form">
           <select
             name="type"
             value={type}
             onChange={(e) => setType(e.target.value)}
             required
-            className="input"
-            style={styles.input}
+            className="reservation-select"
           >
             <option value="">Odaberi tip rezervacije</option>
             <option value="overnattningslagenhet">Övernattningslägenhet</option>
@@ -95,54 +112,33 @@ const Reservations = () => {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
-            className="input"
-            style={styles.input}
+            className="reservation-input"
           />
 
-          <button type="submit" className="button" style={styles.button}>Rezerviši</button>
+          <button type="submit" className="reservation-button">Rezerviši</button>
         </form>
 
         <ul style={{ listStyle: "none", padding: 0 }}>
           {reservations.map((res) => (
-            <li key={res.id} className="reservation-card">
-              <div>
-                <strong>{res.userName || "Nepoznato"} (Stan {res.apartmentNumber || "?"})</strong>
-              </div>
-              <div>{res.date}</div>
+            <li key={res.id} className="reservation-item">
+              <strong>{res.userName || "Nepoznato"} (Stan {res.apartmentNumber || "?"})</strong>
+              <div className="reservation-date">Datum: {res.date}</div>
+              <div className="reservation-type">Rezervisano: {res.type === "overnattningslagenhet" ? "Övernattningslägenhet" : "Takterras"}</div>
               <div><a href={`mailto:${res.user}`}>Kontakt</a></div>
+              {res.user === localStorage.getItem("userEmail") && (
+                <button
+                  onClick={() => handleDelete(res.id)}
+                  className="reservation-delete-button"
+                >
+                  Obriši
+                </button>
+              )}
             </li>
           ))}
         </ul>
       </div>
     </div>
   );
-};
-
-const styles = {
-  form: {
-    marginBottom: "1rem",
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-  },
-  input: {
-    padding: "0.5rem",
-    fontSize: "1rem",
-  },
-  button: {
-    padding: "0.5rem",
-    fontSize: "1rem",
-    backgroundColor: "#2196F3",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-  },
-  success: {
-    color: "green",
-  },
 };
 
 export default Reservations;

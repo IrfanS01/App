@@ -8,7 +8,9 @@ export const createReservation = async (data) => {
   return await fetchHelper("/reservations", "POST", data);
 };
 
-export const deleteReservation = async (reservationId) => {
-  const userId = localStorage.getItem("userEmail");
-  return await fetchHelper("/reservations/delete", "POST", { reservationId, userId });
+export const deleteReservation = async (id) => {
+  return await fetchHelper("/reservations/delete", "POST", {
+    reservationId: id,
+    userId: localStorage.getItem("userEmail"),
+  });
 };
