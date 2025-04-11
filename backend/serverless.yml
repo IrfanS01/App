@@ -8,6 +8,7 @@ provider:
   environment:
     COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
     COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID}
+    AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
     REGION: ${env:REGION}
     RESERVATIONS_TABLE: ${env:RESERVATIONS_TABLE}
     USERS_TABLE: ${env:USERS_TABLE}
@@ -15,6 +16,27 @@ provider:
     MESSAGES_TABLE: ${env:MESSAGES_TABLE}
     USERS_TABLE_PRIMARY_KEY: ${env:USERS_TABLE_PRIMARY_KEY}
     CORS_ORIGIN: ${env:CORS_ORIGIN}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Query
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+      Resource:
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:USERS_TABLE}
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:USERS_TABLE}/index/*
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:NOTIFICATIONS_TABLE}
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:NOTIFICATIONS_TABLE}/index/*
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:RESERVATIONS_TABLE}
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:RESERVATIONS_TABLE}/index/*
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:MESSAGES_TABLE}
+        - arn:aws:dynamodb:${env:REGION}:${env:AWS_ACCOUNT_ID}:table/${env:MESSAGES_TABLE}/index/*
+
+  apiGateway:
+    shouldStartNameWithService: true
+
 
 functions:
   register:
@@ -24,11 +46,11 @@ functions:
           path: auth/register
           method: post
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
 
   login:
     handler: src/handlers/auth.login
@@ -37,11 +59,11 @@ functions:
           path: auth/login
           method: post
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
 
   getUsers:
     handler: src/handlers/users.getUsers
@@ -50,11 +72,15 @@ functions:
           path: users
           method: get
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   createNotification:
     handler: src/handlers/notifications.createNotification
@@ -63,11 +89,15 @@ functions:
           path: notifications
           method: post
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   getNotifications:
     handler: src/handlers/notifications.getNotifications
@@ -76,11 +106,15 @@ functions:
           path: notifications
           method: get
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   deleteNotification:
     handler: src/handlers/notifications.deleteNotification
@@ -89,76 +123,135 @@ functions:
           path: notifications/{id}
           method: delete
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   createReservation:
-    handler: src/handlers/reservations.createReservation
+    handler: src/functions/reservations/create.handler
     events:
       - http:
           path: reservations
           method: post
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   getReservations:
-    handler: src/handlers/reservations.getReservations
+    handler: src/functions/reservations/get.handler
     events:
       - http:
           path: reservations
           method: get
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   deleteReservation:
-    handler: src/handlers/reservations.deleteReservation
+    handler: src/functions/reservations/delete.handler
     events:
       - http:
           path: reservations/delete
           method: post
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   sendMessage:
-    handler: src/handlers/messages.sendMessage
+    handler: src/functions/messages/send.handler
     events:
       - http:
           path: messages/send
           method: post
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   getMessages:
-    handler: src/handlers/messages.getMessages
+    handler: src/functions/messages/get.handler
     events:
       - http:
           path: messages
           method: get
           cors:
-            origin: 'http://localhost:3000'
+            origin: ${env:CORS_ORIGIN}
             headers:
               - Content-Type
               - Authorization
-            allowCredentials: false
+            allowCredentials: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
 plugins:
   - serverless-offline
+
+resources:
+  Resources:
+    ApiGatewayAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: CognitoAuthorizer
+        Type: COGNITO_USER_POOLS
+        IdentitySource: method.request.header.Authorization
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ProviderARNs:
+          - arn:aws:cognito-idp:eu-north-1:${env:AWS_ACCOUNT_ID}:userpool/${env:COGNITO_USER_POOL_ID}
+
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:CORS_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+
+    GatewayResponseDefault5XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'${env:CORS_ORIGIN}'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"

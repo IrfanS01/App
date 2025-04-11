@@ -1,0 +1,10 @@
+{
+    "requestContext": {
+      "authorizer": {
+        "claims": {
+          "email": "isarac89@gmail.com"
+        }
+      }
+    }
+  }
+  

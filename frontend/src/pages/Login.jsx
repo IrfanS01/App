@@ -12,25 +12,36 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg("");
-
+  
     if (!email || !password) {
       setErrorMsg("Please enter email and password.");
       return;
     }
-
+  
     const { success, data, error } = await fetchHelper("/auth/login", "POST", { email, password }, false);
-
+  
     if (success) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
+      console.log("✅ Login response:", data); // možeš ukloniti kasnije
+  
+      const token = data?.data?.token;
+      const role = data?.data?.role;
+      const fullName = data?.data?.fullName;
+      const apartmentNumber = data?.data?.apartmentNumber;
+  
+      localStorage.setItem("token", token);
+      console.log("✔️ Token postavljen:", token);
+  
+      localStorage.setItem("role", role);
       localStorage.setItem("userEmail", email);
-      localStorage.setItem("fullName", data.fullName);
-      localStorage.setItem("apartmentNumber", data.apartmentNumber);
+      localStorage.setItem("fullName", fullName);
+      localStorage.setItem("apartmentNumber", apartmentNumber);
+  
       navigate("/dashboard");
     } else {
       setErrorMsg(error);
     }
   };
+  
 
   return (
     <>
