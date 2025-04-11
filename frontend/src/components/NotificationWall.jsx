@@ -1,4 +1,3 @@
-// NotificationWall.jsx
 import { useEffect, useState } from "react";
 import PostNotification from "../pages/PostNotification";
 
@@ -7,10 +6,17 @@ const NotificationWall = () => {
   const [error, setError] = useState("");
   const [editingNote, setEditingNote] = useState(null);
 
-  // Fetch notifications from backend
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.warn("🚫 Token nije pronađen, ne šaljem zahtjev.");
+        return;
+      }
+
+      console.log("📤 Fetching notifications with token:", token);
+
       const res = await fetch(`${process.env.REACT_APP_API_URL}/notifications`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -32,7 +38,6 @@ const NotificationWall = () => {
     fetchNotifications();
   }, []);
 
-  // Delete notification by ID
   const handleDelete = async (id) => {
     const confirm = window.confirm("Are you sure you want to delete this notification?");
     if (!confirm) return;
@@ -63,12 +68,18 @@ const NotificationWall = () => {
         {notifications.map((note) => (
           <li key={note.id} className="notification-item">
             <h3>{note.title}</h3>
-            <p>{note.message}</p>
-            <small>{new Date(note.createdAt).toLocaleString()}</small>
+<p>{note.message}</p>
+<p>
+  <strong>By:</strong> {note.fullName || "Unknown"} • Apt: {note.apartmentNumber || "?"}
+</p>
+<small>{new Date(note.createdAt).toLocaleString()}</small>
+
             {note.userId === localStorage.getItem("userEmail") && (
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={() => setEditingNote(note)}>Edit</button>
-                <button onClick={() => handleDelete(note.id)} style={{ marginLeft: "0.5rem" }}>Delete</button>
+                <button onClick={() => handleDelete(note.id)} style={{ marginLeft: "0.5rem" }}>
+                  Delete
+                </button>
               </div>
             )}
           </li>

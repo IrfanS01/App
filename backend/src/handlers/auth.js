@@ -74,9 +74,10 @@ const login = async (event) => {
 
   try {
     const authResult = await cognito.initiateAuth(params).promise();
-    const token = authResult.AuthenticationResult.IdToken;
+    const token = authResult.AuthenticationResult.IdToken; // ✅ ovo koristi API Gateway authorizer
 
     // 🔎 Dohvati korisničke atribute
+
     const userDetails = await cognito
       .getUser({
         AccessToken: authResult.AuthenticationResult.AccessToken,
@@ -114,7 +115,12 @@ const login = async (event) => {
 
     return response.success({ token, role: userRole, fullName, apartmentNumber });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("❌ Login error:", {
+  message: error.message,
+  name: error.name,
+  stack: error.stack,
+});
+
     return response.error("Prijava neuspješna: " + error.message);
   }
 };

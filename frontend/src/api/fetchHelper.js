@@ -3,8 +3,21 @@ const fetchHelper = async (endpoint, method = "GET", body = null, auth = true) =
   
     if (auth) {
       const token = localStorage.getItem("token");
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (!token) {
+        console.warn("🚫 Token nije pronađen u localStorage.");
+        throw new Error("Korisnik nije prijavljen.");
+      }
+      headers["Authorization"] = `Bearer ${token}`;
     }
+    
+
+    console.log("🔎 Fetching:", {
+      endpoint,
+      method,
+      headers,
+      body,
+      token: localStorage.getItem("token"),
+    });
   
     const config = {
       method,
